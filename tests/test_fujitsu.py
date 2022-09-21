@@ -1,10 +1,23 @@
-"""
-2,2,1,0,0,2,0,1,0,46,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-2,3,1,0,0,2,0,1,0,46,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-2,4,1,0,0,2,0,1,0,46,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-3,2,1,0,0,2,0,1,0,46,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-3,3,1,0,0,2,0,1,0,51,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-3,4,1,0,0,2,0,1,0,46,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-3,5,1,0,0,2,0,1,0,46,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-4,2,1,0,0,2,0,1,0,46,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-"""
+from urllib import response
+from fujitsu.fujitsu import FujitsuHvac
+import responses
+from urllib.parse import urljoin
+
+BASE_URL = "https://baseurl.com"
+
+
+@responses.activate
+def test_login():
+    responses.add(responses.POST,
+                  urljoin(BASE_URL, "login.cgi"),
+                  adding_headers={
+                      "set-cookie": "sessionid=cookie; " +
+                      "path=/; " +
+                      ""
+                  })
+
+    hvac = FujitsuHvac(BASE_URL)
+
+    session = hvac.login("user", "password")
+
+    assert session.cookies.get('sessionid') == 'cookie'
