@@ -1,6 +1,6 @@
 import datetime, random, time, requests
 from urllib.parse import urljoin
-from fujitsu.hvac_info import HvacInfo
+from fujitsu.hvac_info import HvacInfo, Mode, FanSpeed
 
 
 HEADERS = {
@@ -95,5 +95,94 @@ class FujitsuHvac:
             infos.append(HvacInfo.from_info(info.split(",")))
         return infos
 
+    # @retry_with_backoff(retries=3)
+    def set_settings(
+        self,
+        circuit: int,
+        sub_id: int,
+        new_power_status: bool = None,
+        new_mode: Mode = None,
+        new_fan_speed: FanSpeed = None,
+        new_temp: float = None,
+    ):
+        if self.session is None:
+            self.login()
+
+        headers = {
+            "X-Requested-With": "XMLHttpRequest",
+            "Content-Type": "application/json",
+        }
+
+        response = self.session.post(
+            self.url("command.cgi"),
+            data={
+                "arg1": 0,
+                "arg2": self.to_command_str(
+                    circuit, sub_id, new_power_status, new_mode, new_fan_speed, new_temp
+                ),
+            },
+            headers=headers,
+            verify=False,
+        ).text
+
+        if response != "0":
+            self.logout()
+            print("Error: " + response)
+            raise Exception("Error found")
+
     def url(self, path: str) -> str:
         return urljoin(self.base_url, path)
+
+    def to_command_str(
+        self,
+        circuit: int,
+        sub_id: int,
+        new_power_status: bool = None,
+        new_mode: Mode = None,
+        new_fan_speed: FanSpeed = None,
+        new_temp: float = None,
+    ):
+        cmd = [
+            circuit + 1,
+            sub_id + 1,
+            self.__to_change_str(new_power_status),
+            0 if new_power_status else self.__bool_to_command_str(new_power_status),
+            self.__to_change_str(new_mode),
+            0 if new_mode is None else new_mode.cmd_value,
+            self.__to_change_str(new_fan_speed),
+            0 if new_fan_speed is None else new_fan_speed.value,
+            self.__to_change_str(new_temp),
+            0 if new_temp is None else int(new_temp * 2),
+            0,  # Changed air vert?
+            0,  # Air vert
+            0,
+            0,  # Changed air hrz
+            0,  # Air hrz
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,  # Cold or hot tmp change
+            0,  # Cold temp
+            0,  # Hot temp
+        ]
+        return ",".join([r"\"" + str(val) + r"\"" for val in cmd]) + r"\r\n"
+
+    def __to_change_str(self, changed_attr) -> int:
+        return self.__bool_to_command_str(changed_attr is None)
+
+    def __bool_to_command_str(self, changed_attr) -> int:
+        return 1 if changed_attr else 0
