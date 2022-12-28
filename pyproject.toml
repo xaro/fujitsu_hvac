@@ -1,0 +1,14 @@
+[project]
+name = "fujitsu_hvac_xaro"
+version = "0.0.1"
+authors = [
+  { name="Roberto Poo", email="roberto.poo@gmail.com" },
+]
+description = "Package to communicate with a local Fujitsu HVAC system."
+readme = "README.md"
+requires-python = ">=3"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
