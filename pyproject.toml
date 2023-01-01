@@ -1,6 +1,6 @@
 [project]
 name = "fujitsu_hvac_xaro"
-version = "0.0.1"
+version = "0.0.2"
 authors = [
   { name="Roberto Poo", email="roberto.poo@gmail.com" },
 ]
@@ -12,3 +12,7 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
