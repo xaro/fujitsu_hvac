@@ -1,6 +1,6 @@
-import datetime, random, time, requests
+import datetime, random, time, requests, asyncio
 from urllib.parse import urljoin
-from fujitsu.hvac_info import HvacInfo, Mode, FanSpeed
+from hvac_info import HvacInfo, Mode, FanSpeed
 
 
 HEADERS = {
@@ -43,10 +43,10 @@ class FujitsuHvac:
         self.password = password
         self.session = None
 
-    def login(self):
+    async def login(self):
         # Ensure that we are not logged in before, if not will get
         # error 4
-        self.logout()
+        await self.logout()
 
         # TODO: Handle failures like bad user/pass
         payload = {
@@ -67,14 +67,14 @@ class FujitsuHvac:
 
         self.session = session
 
-    def logout(self):
+    async def logout(self):
         requests.post(self.url("logout.cgi"), verify=False)
         self.session = None
 
     @retry_with_backoff(retries=5)
-    def get_all_info(self) -> list[HvacInfo]:
+    async def get_all_info(self) -> list[HvacInfo]:
         if self.session is None:
-            self.login()
+            await self.login()
 
         response = self.session.post(
             self.url("getmondata.cgi"),
@@ -96,7 +96,7 @@ class FujitsuHvac:
         return infos
 
     # @retry_with_backoff(retries=3)
-    def set_settings(
+    async def set_settings(
         self,
         circuit: int,
         sub_id: int,
@@ -106,7 +106,7 @@ class FujitsuHvac:
         new_temp: float = None,
     ):
         if self.session is None:
-            self.login()
+            await self.login()
 
         headers = {
             "X-Requested-With": "XMLHttpRequest",
