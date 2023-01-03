@@ -1,6 +1,6 @@
 [project]
 name = "fujitsu_hvac_xaro"
-version = "0.0.3"
+version = "0.0.4"
 authors = [
   { name="Roberto Poo", email="roberto.poo@gmail.com" },
 ]
