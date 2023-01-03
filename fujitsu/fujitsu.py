@@ -1,6 +1,6 @@
 import datetime, random, time, requests, asyncio
 from urllib.parse import urljoin
-from hvac_info import HvacInfo, Mode, FanSpeed
+from fujitsu.hvac_info import HvacInfo, Mode, FanSpeed
 
 
 HEADERS = {
